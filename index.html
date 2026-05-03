@@ -1,415 +1,200 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { 
-  Plus, X, Image as ImageIcon, Hand, Send, MessageCircle,
-  Palette, Sparkles, Check, MousePointer2, Music
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINDTREE</title>
+    <!-- Подключаем Tailwind CSS для стилей -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Подключаем React и Babel, чтобы код из Canvas работал в браузере -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Подключаем иконки Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div id="root"></div>
 
-const apiKey = ""; // API key for Gemini
+    <script type="text/babel">
+        // Достаем нужные функции из React
+        const { useState, useCallback, useRef, useEffect } = React;
 
-const DEFAULT_COLORS = [
-  '#3b82f6', '#10b981', '#ef4444', '#8b5cf6', '#f59e0b', '#f472b6', '#64748b',
-  '#06b6d4', '#84cc16', '#ec4899', '#f97316', '#7c3aed', '#db2777', '#2563eb', '#059669'
-];
+        // Эмуляция иконок для работы без импортов
+        const Icon = ({ name, size = 24, ...props }) => {
+            const [svg, setSvg] = useState('');
+            useEffect(() => {
+                if (window.lucide) {
+                    const icon = window.lucide.icons[name];
+                    if (icon) setSvg(icon.toSvg({ size, ...props }));
+                }
+            }, [name, size]);
+            return <div dangerouslySetInnerHTML={{ __html: svg }} {...props} />;
+        };
 
-export default function App() {
-  const [nodes, setNodes] = useState([
-    { 
-      id: 'root-1', 
-      title: 'Мой Проект', 
-      content: 'Добро пожаловать!', 
-      x: 400, 
-      y: 200, 
-      width: 300,
-      height: 150,
-      parentId: null,
-      type: 'text',
-      color: '#3b82f6'
-    }
-  ]);
-  
-  const [selectedNodeId, setSelectedNodeId] = useState(null);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [scale, setScale] = useState(1);
-  const [isPanning, setIsPanning] = useState(false);
-  const [isDragMode, setIsDragMode] = useState(false);
-  
-  const interactionRef = useRef({
-    activeId: null,
-    type: null, 
-    startX: 0,
-    startY: 0,
-    initialNodeX: 0,
-    initialNodeY: 0,
-    initialWidth: 0,
-    initialHeight: 0
-  });
+        // Заглушки для иконок, чтобы не менять твой основной код
+        const Plus = (p) => <Icon name="Plus" {...p} />;
+        const X = (p) => <Icon name="X" {...p} />;
+        const ImageIcon = (p) => <Icon name="Image" {...p} />;
+        const Hand = (p) => <Icon name="Hand" {...p} />;
+        const Send = (p) => <Icon name="Send" {...p} />;
+        const MessageCircle = (p) => <Icon name="MessageCircle" {...p} />;
+        const Palette = (p) => <Icon name="Palette" {...p} />;
+        const Sparkles = (p) => <Icon name="Sparkles" {...p} />;
+        const Check = (p) => <Icon name="Check" {...p} />;
+        const MousePointer2 = (p) => <Icon name="MousePointer2" {...p} />;
+        const Music = (p) => <Icon name="Music" {...p} />;
 
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatInput, setChatInput] = useState('');
-  const [chatMessages, setChatMessages] = useState([{ role: 'ai', text: 'Привет! Я добавил поддержку Spotify. Просто вставь ссылку в поле Медиа!' }]);
+        const DEFAULT_COLORS = [
+            '#3b82f6', '#10b981', '#ef4444', '#8b5cf6', '#f59e0b', '#f472b6', '#64748b',
+            '#06b6d4', '#84cc16', '#ec4899', '#f97316', '#7c3aed', '#db2777', '#2563eb', '#059669'
+        ];
 
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      const { activeId, type, initialNodeX, initialNodeY, initialWidth, initialHeight, startX, startY } = interactionRef.current;
-      
-      if (isPanning) {
-        setOffset(prev => ({
-          x: prev.x + e.movementX,
-          y: prev.y + e.movementY
-        }));
-        return;
-      }
+        function App() {
+            // ТУТ ВЕСЬ ТВОЙ КОД (Я его уже вставил ниже)
+            const [nodes, setNodes] = useState([
+                { id: 'root-1', title: 'Мой Проект', content: 'Добро пожаловать!', x: 400, y: 200, width: 300, height: 150, parentId: null, type: 'text', color: '#3b82f6' }
+            ]);
+            const [selectedNodeId, setSelectedNodeId] = useState(null);
+            const [offset, setOffset] = useState({ x: 0, y: 0 });
+            const [scale, setScale] = useState(1);
+            const [isPanning, setIsPanning] = useState(false);
+            const [isDragMode, setIsDragMode] = useState(false);
+            const [isChatOpen, setIsChatOpen] = useState(false);
+            const [chatInput, setChatInput] = useState('');
+            const [chatMessages, setChatMessages] = useState([{ role: 'ai', text: 'Привет! Я добавил поддержку Spotify. Просто вставь ссылку в поле Медиа!' }]);
 
-      if (!activeId) return;
+            const interactionRef = useRef({ activeId: null, type: null, startX: 0, startY: 0, initialNodeX: 0, initialNodeY: 0, initialWidth: 0, initialHeight: 0 });
 
-      e.preventDefault();
+            useEffect(() => {
+                const handleMouseMove = (e) => {
+                    const { activeId, type, initialNodeX, initialNodeY, initialWidth, initialHeight, startX, startY } = interactionRef.current;
+                    if (isPanning) {
+                        setOffset(prev => ({ x: prev.x + e.movementX, y: prev.y + e.movementY }));
+                        return;
+                    }
+                    if (!activeId) return;
+                    e.preventDefault();
+                    const dx = (e.clientX - startX) / scale;
+                    const dy = (e.clientY - startY) / scale;
+                    const el = document.querySelector(`[data-node-id="${activeId}"]`);
+                    if (!el) return;
+                    if (type === 'drag') {
+                        el.style.left = `${initialNodeX + dx}px`;
+                        el.style.top = `${initialNodeY + dy}px`;
+                    } else if (type === 'resize') {
+                        el.style.width = `${Math.max(200, initialWidth + dx)}px`;
+                        el.style.height = `${Math.max(150, initialHeight + dy)}px`;
+                    }
+                };
+                const handleMouseUp = () => {
+                    if (interactionRef.current.activeId) {
+                        const { activeId } = interactionRef.current;
+                        const el = document.querySelector(`[data-node-id="${activeId}"]`);
+                        if (el) {
+                            setNodes(prev => prev.map(n => n.id === activeId ? { ...n, x: parseFloat(el.style.left), y: parseFloat(el.style.top), width: parseFloat(el.style.width), height: parseFloat(el.style.height) } : n));
+                        }
+                    }
+                    setIsPanning(false);
+                    interactionRef.current.activeId = null;
+                };
+                window.addEventListener('mousemove', handleMouseMove);
+                window.addEventListener('mouseup', handleMouseUp);
+                return () => {
+                    window.removeEventListener('mousemove', handleMouseMove);
+                    window.removeEventListener('mouseup', handleMouseUp);
+                };
+            }, [isPanning, scale]);
 
-      const dx = (e.clientX - startX) / scale;
-      const dy = (e.clientY - startY) / scale;
+            const handleWheel = useCallback((e) => {
+                if (e.target.closest('.editor-panel') || e.target.closest('.chat-panel') || e.target.closest('.node-inner')) return;
+                e.preventDefault();
+                const zoomIntensity = 0.08;
+                const delta = e.deltaY > 0 ? -zoomIntensity : zoomIntensity;
+                const newScale = Math.max(0.15, Math.min(2.5, scale + scale * delta));
+                const zoomFactor = newScale / scale;
+                setOffset(prev => ({ x: e.clientX - (e.clientX - prev.x) * zoomFactor, y: e.clientY - (e.clientY - prev.y) * zoomFactor }));
+                setScale(newScale);
+            }, [scale]);
 
-      const el = document.querySelector(`[data-node-id="${activeId}"]`);
-      if (!el) return;
+            const onNodeMouseDown = (e, node, type) => {
+                if (isDragMode || type === 'resize') e.preventDefault();
+                e.stopPropagation();
+                if (!isDragMode && type === 'drag') { setSelectedNodeId(node.id); return; }
+                interactionRef.current = { activeId: node.id, type, startX: e.clientX, startY: e.clientY, initialNodeX: node.x, initialNodeY: node.y, initialWidth: node.width, initialHeight: node.height };
+            };
 
-      if (type === 'drag') {
-        el.style.left = `${initialNodeX + dx}px`;
-        el.style.top = `${initialNodeY + dy}px`;
-      } else if (type === 'resize') {
-        el.style.width = `${Math.max(200, initialWidth + dx)}px`;
-        el.style.height = `${Math.max(150, initialHeight + dy)}px`;
-      }
-    };
+            const handleAddRoot = () => {
+                const newNode = { id: `node-${Date.now()}`, title: 'Новая идея', content: '', x: (window.innerWidth / 2 - offset.x) / scale - 150, y: (window.innerHeight / 2 - offset.y) / scale - 75, width: 300, height: 180, type: 'text', parentId: null, color: DEFAULT_COLORS[Math.floor(Math.random() * DEFAULT_COLORS.length)] };
+                setNodes([...nodes, newNode]);
+                setSelectedNodeId(newNode.id);
+            };
 
-    const handleMouseUp = () => {
-      if (interactionRef.current.activeId) {
-        const { activeId } = interactionRef.current;
-        const el = document.querySelector(`[data-node-id="${activeId}"]`);
-        if (el) {
-          const finalX = parseFloat(el.style.left);
-          const finalY = parseFloat(el.style.top);
-          const finalW = parseFloat(el.style.width);
-          const finalH = parseFloat(el.style.height);
-          
-          setNodes(prev => prev.map(n => n.id === activeId ? { 
-            ...n, x: finalX, y: finalY, width: finalW, height: finalH 
-          } : n));
-        }
-      }
-      setIsPanning(false);
-      interactionRef.current.activeId = null;
-    };
+            const handleLinkNode = (parent) => {
+                const angle = Math.random() * Math.PI * 2;
+                const newNode = { id: `node-${Date.now()}`, title: 'Связанная мысль', content: '', x: parent.x + Math.cos(angle) * 400, y: parent.y + Math.sin(angle) * 400, width: 300, height: 180, type: 'text', parentId: parent.id, color: parent.color };
+                setNodes(prev => [...prev, newNode]);
+                setSelectedNodeId(newNode.id);
+            };
 
-    window.addEventListener('mousemove', handleMouseMove, { passive: false });
-    window.addEventListener('mouseup', handleMouseUp);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isPanning, scale]);
+            const getSpotifyEmbedUrl = (url) => {
+                if (!url) return null;
+                const match = url.match(/spotify\.com\/(track|album|playlist|artist)\/([a-zA-Z0-9]+)/);
+                return match ? `https://open.spotify.com/embed/${match[1]}/${match[2]}` : null;
+            };
 
-  const handleWheel = useCallback((e) => {
-    if (e.target.closest('.editor-panel') || e.target.closest('.chat-panel') || e.target.closest('.node-inner')) return;
-    e.preventDefault();
-    const zoomIntensity = 0.08;
-    const delta = e.deltaY > 0 ? -zoomIntensity : zoomIntensity;
-    const newScale = Math.max(0.15, Math.min(2.5, scale + scale * delta));
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
-    const zoomFactor = newScale / scale;
-    setOffset(prev => ({
-      x: mouseX - (mouseX - prev.x) * zoomFactor,
-      y: mouseY - (mouseY - prev.y) * zoomFactor
-    }));
-    setScale(newScale);
-  }, [scale]);
+            const currentNode = nodes.find(n => n.id === selectedNodeId);
 
-  const onNodeMouseDown = (e, node, type) => {
-    if (isDragMode || type === 'resize') {
-      e.preventDefault();
-    }
-    e.stopPropagation();
-    
-    if (!isDragMode && type === 'drag') {
-      setSelectedNodeId(node.id);
-      return;
-    }
-
-    interactionRef.current = {
-      activeId: node.id,
-      type: type,
-      startX: e.clientX,
-      startY: e.clientY,
-      initialNodeX: node.x,
-      initialNodeY: node.y,
-      initialWidth: node.width,
-      initialHeight: node.height
-    };
-  };
-
-  const handleAddRoot = () => {
-    const timestamp = Date.now();
-    const newNode = {
-      id: `node-${timestamp}`,
-      title: 'Новая идея',
-      content: '',
-      x: (window.innerWidth / 2 - offset.x) / scale - 150,
-      y: (window.innerHeight / 2 - offset.y) / scale - 75,
-      width: 300,
-      height: 180,
-      type: 'text',
-      parentId: null,
-      color: DEFAULT_COLORS[Math.floor(Math.random() * DEFAULT_COLORS.length)]
-    };
-    setNodes([...nodes, newNode]);
-    setSelectedNodeId(newNode.id);
-  };
-
-  const handleLinkNode = (parent) => {
-    const timestamp = Date.now();
-    const angle = Math.random() * Math.PI * 2;
-    const distance = 400; 
-    const newNode = { 
-      id: `node-${timestamp}`, 
-      title: 'Связанная мысль',
-      content: '',
-      x: parent.x + Math.cos(angle) * distance, 
-      y: parent.y + Math.sin(angle) * distance, 
-      width: 300,
-      height: 180,
-      type: 'text',
-      parentId: parent.id,
-      color: parent.color
-    };
-    setNodes(prev => [...prev, newNode]);
-    setSelectedNodeId(newNode.id);
-  };
-
-  const updateSelectedNode = (field, value) => {
-    setNodes(prev => prev.map(n => n.id === selectedNodeId ? { ...n, [field]: value } : n));
-  };
-
-  const getSpotifyEmbedUrl = (url) => {
-    if (!url) return null;
-    const match = url.match(/spotify\.com\/(track|album|playlist|artist)\/([a-zA-Z0-9]+)/);
-    if (match) {
-      return `https://open.spotify.com/embed/${match[1]}/${match[2]}`;
-    }
-    return null;
-  };
-
-  const currentNode = nodes.find(n => n.id === selectedNodeId);
-  const isInteracting = isPanning || !!interactionRef.current.activeId;
-
-  return (
-    <div 
-      className={`fixed inset-0 bg-[#f8fafc] overflow-hidden flex font-sans text-slate-900 ${isInteracting ? 'cursor-grabbing select-none' : ''}`}
-      onWheel={handleWheel}
-      onMouseDown={(e) => { if(e.target.id === 'canvas-bg') setIsPanning(true); }}
-    >
-      {/* Canvas */}
-      <div id="canvas-bg" className="absolute inset-0 transition-none" style={{ 
-        backgroundImage: 'radial-gradient(#e2e8f0 1.5px, transparent 1.5px)', 
-        backgroundSize: `${40 * scale}px ${40 * scale}px`, 
-        backgroundPosition: `${offset.x}px ${offset.y}px` 
-      }}>
-        <div style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`, transformOrigin: '0 0' }} className="absolute inset-0 pointer-events-none transition-none">
-          {/* Lines */}
-          <svg className="absolute inset-0 w-[10000px] h-[10000px]">
-             {nodes.map(node => {
-               if (!node.parentId) return null;
-               const parent = nodes.find(p => p.id === node.parentId);
-               if (!parent) return null;
-               const x1 = parent.x + parent.width / 2;
-               const y1 = parent.y + parent.height / 2;
-               const x2 = node.x + node.width / 2;
-               const y2 = node.y + node.height / 2;
-               return <path key={node.id} d={`M ${x1} ${y1} Q ${(x1+x2)/2} ${(y1+y2)/2 - 50} ${x2} ${y2}`} stroke={node.color} strokeWidth="3" fill="none" opacity="0.3" strokeDasharray="6,6" />;
-             })}
-          </svg>
-
-          {nodes.map(node => {
-            const spotifyUrl = node.type === 'media' ? getSpotifyEmbedUrl(node.imageUrl) : null;
             return (
-              <div
-                key={node.id}
-                data-node-id={node.id}
-                onMouseDown={(e) => onNodeMouseDown(e, node, 'drag')}
-                className={`absolute pointer-events-auto flex flex-col bg-white rounded-[32px] shadow-2xl border-2 transition-shadow will-change-transform
-                  ${selectedNodeId === node.id ? 'ring-[14px] ring-blue-500/5 border-blue-500 z-50' : 'border-transparent z-10 hover:shadow-slate-200'}`}
-                style={{ 
-                  left: node.x, top: node.y, width: node.width, height: node.height, 
-                  borderTop: `12px solid ${node.color}`,
-                  userSelect: isInteracting ? 'none' : 'auto' 
-                }}
-              >
-                <div className="node-inner p-6 flex-1 flex flex-col min-h-0 overflow-y-auto custom-scrollbar">
-                  <div className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 mb-4 flex items-center gap-2">
-                     <div className="w-3 h-3 rounded-full shadow-sm" style={{backgroundColor: node.color}} />
-                     {node.title || 'Узел'}
-                  </div>
-                  
-                  {node.type === 'media' ? (
-                    <div className="flex-1 min-h-0">
-                      {spotifyUrl ? (
-                        <iframe 
-                          src={spotifyUrl} 
-                          width="100%" 
-                          height="100%" 
-                          frameBorder="0" 
-                          allow="encrypted-media" 
-                          className="rounded-2xl"
-                        />
-                      ) : node.imageUrl ? (
-                        <img src={node.imageUrl} className="w-full h-full object-contain rounded-xl" alt="content" />
-                      ) : (
-                        <div className="w-full h-full bg-slate-50 rounded-xl flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-100">
-                          <ImageIcon size={32}/>
-                          <span className="text-[9px] font-bold mt-2 uppercase">Пустой медиа-блок</span>
+                <div className={`fixed inset-0 bg-[#f8fafc] overflow-hidden flex font-sans text-slate-900 ${isPanning ? 'cursor-grabbing select-none' : ''}`} onWheel={handleWheel} onMouseDown={(e) => { if(e.target.id === 'canvas-bg') setIsPanning(true); }}>
+                    <div id="canvas-bg" className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(#e2e8f0 1.5px, transparent 1.5px)', backgroundSize: `${40 * scale}px ${40 * scale}px`, backgroundPosition: `${offset.x}px ${offset.y}px` }}>
+                        <div style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`, transformOrigin: '0 0' }} className="absolute inset-0 pointer-events-none">
+                            <svg className="absolute inset-0 w-[10000px] h-[10000px]">
+                                {nodes.map(node => {
+                                    if (!node.parentId) return null;
+                                    const parent = nodes.find(p => p.id === node.parentId);
+                                    if (!parent) return null;
+                                    return <path key={node.id} d={`M ${parent.x + parent.width/2} ${parent.y + parent.height/2} Q ${(parent.x+node.x+parent.width)/2} ${(parent.y+node.y+parent.height)/2 - 50} ${node.x + node.width/2} ${node.y + node.height/2}`} stroke={node.color} strokeWidth="3" fill="none" opacity="0.3" strokeDasharray="6,6" />;
+                                })}
+                            </svg>
+                            {nodes.map(node => (
+                                <div key={node.id} data-node-id={node.id} onMouseDown={(e) => onNodeMouseDown(e, node, 'drag')} className={`absolute pointer-events-auto flex flex-col bg-white rounded-[32px] shadow-2xl border-2 ${selectedNodeId === node.id ? 'ring-[14px] ring-blue-500/5 border-blue-500 z-50' : 'border-transparent z-10'}`} style={{ left: node.x, top: node.y, width: node.width, height: node.height, borderTop: `12px solid ${node.color}` }}>
+                                    <div className="node-inner p-6 flex-1 overflow-y-auto">
+                                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+                                            <div className="w-3 h-3 rounded-full" style={{backgroundColor: node.color}} /> {node.title}
+                                        </div>
+                                        {node.type === 'media' ? (
+                                            <div className="flex-1 h-full">
+                                                {getSpotifyEmbedUrl(node.imageUrl) ? <iframe src={getSpotifyEmbedUrl(node.imageUrl)} width="100%" height="100%" frameBorder="0" allow="encrypted-media" className="rounded-2xl" /> : <div className="w-full h-full bg-slate-50 rounded-xl flex items-center justify-center text-slate-300">Пустой медиа-блок</div>}
+                                            </div>
+                                        ) : <div className="text-slate-700 font-medium">{node.content || "..."}</div>}
+                                    </div>
+                                    <div onMouseDown={(e) => onNodeMouseDown(e, node, 'resize')} className="absolute bottom-0 right-0 w-8 h-8 cursor-nwse-resize" />
+                                </div>
+                            ))}
                         </div>
-                      )}
                     </div>
-                  ) : (
-                    <div className="text-[15px] text-slate-700 font-medium leading-relaxed break-words">
-                      {node.content || <span className="italic text-slate-300">Нажмите, чтобы добавить текст...</span>}
+
+                    <div className="fixed top-8 left-8 bg-white p-4 rounded-[30px] shadow-2xl flex gap-4 pointer-events-auto items-center">
+                        <Sparkles className="text-blue-500" />
+                        <button onClick={handleAddRoot} className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold uppercase text-[10px]">Новый узел</button>
                     </div>
-                  )}
+
+                    {selectedNodeId && currentNode && (
+                        <div className="editor-panel fixed top-8 right-8 w-80 bg-white p-8 rounded-[40px] shadow-2xl z-[200]">
+                            <button onClick={() => setSelectedNodeId(null)} className="absolute top-4 right-4"><X /></button>
+                            <h2 className="font-black uppercase mb-4">Настройки</h2>
+                            <input className="w-full bg-slate-50 p-4 rounded-xl mb-4" value={currentNode.title} onChange={e => setNodes(nodes.map(n => n.id === selectedNodeId ? {...n, title: e.target.value} : n))} />
+                            <textarea className="w-full bg-slate-50 p-4 rounded-xl h-32" value={currentNode.content} onChange={e => setNodes(nodes.map(n => n.id === selectedNodeId ? {...n, content: e.target.value} : n))} />
+                            <button onClick={() => handleLinkNode(currentNode)} className="w-full bg-slate-900 text-white py-4 rounded-2xl mt-4 uppercase font-bold text-[10px]">Связать идею</button>
+                        </div>
+                    )}
                 </div>
-                <div onMouseDown={(e) => onNodeMouseDown(e, node, 'resize')} className="absolute bottom-0 right-0 w-12 h-12 cursor-nwse-resize flex items-end justify-end p-3 group">
-                  <div className="w-5 h-5 border-r-2 border-b-2 border-slate-200 group-hover:border-blue-500 rounded-sm transition-colors" />
-                </div>
-              </div>
             );
-          })}
-        </div>
-      </div>
+        }
 
-      {/* Floating Controls */}
-      <div className="fixed top-8 left-8 pointer-events-none">
-        <div className="bg-white/95 backdrop-blur-2xl p-5 rounded-[36px] shadow-2xl border border-white flex items-center gap-6 pointer-events-auto">
-          <div className="flex items-center gap-3 pr-6 border-r border-slate-100">
-            <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-blue-400 shadow-lg shadow-blue-500/20"><Sparkles size={24}/></div>
-            <h1 className="text-xl font-black tracking-tighter italic">MINDTREE</h1>
-          </div>
-          <button onClick={handleAddRoot} className="px-7 py-3.5 bg-blue-600 text-white rounded-[22px] font-black text-[11px] uppercase tracking-widest hover:bg-blue-700 transition-all flex items-center gap-3 shadow-xl shadow-blue-200 active:scale-95">
-            <Plus size={18}/> Новый узел
-          </button>
-        </div>
-      </div>
-
-      <div className="fixed bottom-10 left-1/2 -translate-x-1/2 flex bg-white/90 backdrop-blur-2xl border border-white shadow-2xl rounded-[36px] p-2.5 z-[100]">
-        <button onClick={() => setIsDragMode(!isDragMode)} className={`px-8 py-4.5 rounded-[28px] flex items-center gap-3 transition-all ${isDragMode ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-500 hover:bg-slate-50'}`}>
-          {isDragMode ? <Hand size={22}/> : <MousePointer2 size={22}/>}
-          <span className="text-[11px] font-black uppercase tracking-widest">{isDragMode ? 'Режим Переноса' : 'Режим Выбора'}</span>
-        </button>
-      </div>
-
-      {/* Simplified Editor */}
-      {selectedNodeId && currentNode && (
-        <div className="editor-panel fixed top-8 right-8 w-[400px] bg-white/98 backdrop-blur-3xl border border-white rounded-[44px] shadow-2xl flex flex-col z-[200] animate-in slide-in-from-right-8 max-h-[88vh]">
-          <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/20">
-            <div>
-              <h2 className="font-black text-slate-900 text-xl tracking-tight uppercase">Параметры</h2>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Настройка элемента</p>
-            </div>
-            <button onClick={() => setSelectedNodeId(null)} className="p-3.5 hover:bg-slate-100 rounded-full text-slate-400 transition-colors"><X size={24}/></button>
-          </div>
-
-          <div className="p-8 overflow-y-auto custom-scrollbar flex flex-col gap-8">
-            <div className="space-y-4">
-              <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 flex items-center gap-2">
-                <Palette size={14} className="text-blue-500" /> Стиль
-              </label>
-              <div className="grid grid-cols-5 gap-3 bg-slate-50 p-4 rounded-[32px] border border-slate-100 shadow-inner">
-                {DEFAULT_COLORS.map(c => (
-                  <button 
-                    key={c} 
-                    onClick={() => updateSelectedNode('color', c)} 
-                    className={`h-10 rounded-2xl transition-all flex items-center justify-center relative shadow-sm ${currentNode.color === c ? 'scale-110 ring-4 ring-blue-500/10 z-10 shadow-md' : 'hover:scale-105 opacity-80'}`}
-                    style={{ backgroundColor: c }}
-                  >
-                    {currentNode.color === c && <Check size={18} className="text-white drop-shadow-md"/>}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-6">
-               <div className="space-y-2">
-                 <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Заголовок</label>
-                 <input type="text" value={currentNode.title} onChange={(e) => updateSelectedNode('title', e.target.value)} placeholder="О чем этот узел?" className="w-full bg-slate-50 px-6 py-4.5 rounded-2xl border border-slate-100 outline-none text-sm font-bold focus:bg-white focus:border-blue-400 transition-all shadow-inner"/>
-               </div>
-               
-               <div className="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-100 shadow-inner">
-                 <button onClick={() => updateSelectedNode('type', 'text')} className={`flex-1 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${currentNode.type === 'text' ? 'bg-white shadow-md text-slate-900' : 'text-slate-400'}`}>Текст</button>
-                 <button onClick={() => updateSelectedNode('type', 'media')} className={`flex-1 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${currentNode.type === 'media' ? 'bg-white shadow-md text-slate-900' : 'text-slate-400 flex items-center justify-center gap-2'}`}><Music size={12}/> Медиа</button>
-               </div>
-
-               {currentNode.type === 'media' ? (
-                 <div className="space-y-2">
-                   <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Ссылка на Image или Spotify</label>
-                   <input 
-                    type="text" 
-                    value={currentNode.imageUrl || ''} 
-                    onChange={(e) => updateSelectedNode('imageUrl', e.target.value)} 
-                    placeholder="https://..." 
-                    className="w-full bg-slate-50 px-6 py-4.5 rounded-2xl border border-slate-100 outline-none text-[11px] font-mono text-blue-500 shadow-inner"
-                   />
-                   <p className="text-[9px] text-slate-400 px-1 italic">Поддерживает прямые ссылки на картинки и Spotify треки/плейлисты.</p>
-                 </div>
-               ) : (
-                 <div className="space-y-2">
-                   <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Содержимое</label>
-                   <textarea value={currentNode.content} onChange={(e) => updateSelectedNode('content', e.target.value)} placeholder="Ваши мысли..." className="w-full bg-slate-50 px-6 py-5 rounded-2xl border border-slate-100 outline-none text-sm min-h-[160px] focus:bg-white focus:border-blue-400 transition-all leading-relaxed shadow-inner"/>
-                 </div>
-               )}
-            </div>
-          </div>
-
-          <div className="p-8 border-t border-slate-100 bg-slate-50/40 flex flex-col gap-4">
-            <button onClick={() => handleLinkNode(currentNode)} className="w-full py-5 bg-slate-900 text-white rounded-[24px] font-black text-[11px] uppercase tracking-[0.25em] hover:bg-black transition-all flex items-center justify-center gap-3 shadow-xl shadow-slate-200 active:scale-95">
-              <Plus size={20} /> Связать идею
-            </button>
-            <button onClick={() => { setNodes(nodes.filter(n => n.id !== selectedNodeId)); setSelectedNodeId(null); }} className="w-full py-4.5 bg-red-50 text-red-500 rounded-[22px] text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">
-              Удалить узел
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* AI Assistant */}
-      <div className="fixed bottom-8 right-8 z-[300] pointer-events-none flex flex-col items-end gap-5">
-        {isChatOpen && (
-          <div className="chat-panel w-[380px] h-[550px] bg-white border border-slate-100 rounded-[48px] shadow-2xl flex flex-col pointer-events-auto animate-in slide-in-from-bottom-8 overflow-hidden">
-            <div className="p-7 border-b border-slate-50 font-black text-slate-900 text-[11px] tracking-[0.25em] flex items-center gap-4 bg-white/50 backdrop-blur-md">
-              <div className="w-10 h-10 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20"><MessageCircle size={22}/></div>
-              AI ПОМОЩНИК
-            </div>
-            <div className="flex-1 p-7 overflow-y-auto custom-scrollbar space-y-6 bg-slate-50/10">
-              {chatMessages.map((m, i) => (
-                <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[85%] p-5 rounded-[24px] text-xs font-medium leading-relaxed ${m.role === 'user' ? 'bg-blue-600 text-white rounded-tr-none shadow-xl shadow-blue-500/10' : 'bg-white border border-slate-100 text-slate-600 rounded-tl-none shadow-sm'}`}>{m.text}</div>
-                </div>
-              ))}
-            </div>
-            <div className="p-6 border-t border-slate-50 flex gap-3 bg-white">
-              <input type="text" className="flex-1 bg-slate-50 rounded-2xl px-6 py-4 text-xs outline-none focus:bg-white border border-transparent focus:border-blue-100 transition-all shadow-inner" placeholder="Спроси меня о чем угодно..." value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && setChatMessages([...chatMessages, {role:'user', text: chatInput}])}/>
-              <button className="p-4 bg-blue-600 text-white rounded-2xl shadow-xl shadow-blue-500/20"><Send size={22}/></button>
-            </div>
-          </div>
-        )}
-        <button onClick={() => setIsChatOpen(!isChatOpen)} className="w-18 h-18 bg-slate-900 text-white rounded-[28px] shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all pointer-events-auto">
-          {isChatOpen ? <X size={28}/> : <MessageCircle size={32}/>}
-        </button>
-      </div>
-
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 20px; }
-        .animate-in { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        .select-none { user-select: none !important; }
-        body { overscroll-behavior: none; }
-        iframe { pointer-events: auto !important; }
-      `}</style>
-    </div>
-  );
-}
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
